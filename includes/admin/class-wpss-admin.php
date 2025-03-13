@@ -30,6 +30,12 @@ class WPSS_Admin {
 		 */
 		add_action('admin_init', array($this, 'wp_slideshow_register_settings'));
 		add_action('admin_notices', array($this, 'wp_slideshow_admin_notice'));
+
+		/**
+		 * Metabox Functions
+		 */
+		add_action('add_meta_boxes', array($this, 'wp_slideshow_add_meta_box'));
+		add_action('save_post', array($this, 'wp_slideshow_save_meta_box_data'));
 	}
 
 	/**
@@ -180,6 +186,70 @@ class WPSS_Admin {
         }
     }
 
+	/**
+	 * Add Custom Meta Box for adding image particularly for specific page.
+	 */
+	public function wp_slideshow_add_meta_box() {
+        add_meta_box(
+            'wp_slideshow_images',
+			__( 'Slideshow Images', 'wp-slideshow' ),
+            array($this, 'wp_slideshow_meta_box_callback'),
+            'page',
+            'normal',
+            'high'
+        );
+    }
+
+	 /**
+	  * Meta box callback function to render and upload the slideshow images.
+	  *
+	  * @param object $post Post.
+	  */
+	 public function wp_slideshow_meta_box_callback($post) {
+		wp_nonce_field('wp_slideshow_save_meta_box_data', 'wp_slideshow_meta_box_nonce');
+
+		$saved_images = get_post_meta($post->ID, 'wp_slideshow_images', true);
+		$saved_images = $saved_images ? explode(',', $saved_images) : array();
+
+		?>
+		<div>
+			<input type="hidden" id="wp_slideshow_images" name="wp_slideshow_images" value="<?php echo esc_attr(implode(',', $saved_images)); ?>">
+			<div id="wp_slideshow_images_container">
+				<?php foreach ($saved_images as $image_id) : ?>
+					<?php $image_url = wp_get_attachment_url($image_id); ?>
+					<?php if ($image_url) : ?>
+						<div class="wp_slideshow_image" data-image-id="<?php echo esc_attr($image_id); ?>">
+							<img src="<?php echo esc_url($image_url); ?>" width="100">
+							<button class="remove_image"><?php esc_html_e( 'Remove', 'wp-slideshow' ); ?></button>
+						</div>
+					<?php else : ?>
+						<?php error_log('Invalid Image ID: ' . $image_id); ?>
+					<?php endif; ?>
+				<?php endforeach; ?>
+			</div>
+			<button id="upload_image_button" class="button"><?php esc_html_e( 'Add Image', 'wp-slideshow' ); ?></button>
+		</div>
+		<?php
+	}
+
+	/**
+	 * Save Custom Meta box images.
+	 *
+	 * @param int $post_id Post ID.
+	 */
+    public function wp_slideshow_save_meta_box_data($post_id) {
+		if (!isset($_POST['wp_slideshow_meta_box_nonce']) || !wp_verify_nonce($_POST['wp_slideshow_meta_box_nonce'], 'wp_slideshow_save_meta_box_data')) {
+			return;
+		}
+
+		if (!current_user_can('edit_post', $post_id)) {
+			return;
+		}
+		if (isset($_POST['wp_slideshow_images'])) {
+			$images = sanitize_text_field($_POST['wp_slideshow_images']);
+			update_post_meta($post_id, 'wp_slideshow_images', $images);
+		}
+	}
 }
 
 return new WPSS_Admin();

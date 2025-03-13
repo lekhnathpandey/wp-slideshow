@@ -68,4 +68,72 @@ jQuery(document).ready(function ($) {
       );
     }
   );
+
+  $("#upload_image_button").click(function (e) {
+    e.preventDefault();
+
+    var frame = wp.media({
+      title: "Select or Upload Images",
+      multiple: true,
+      library: {
+        type: "image",
+      },
+      button: {
+        text: "Use these images",
+      },
+    });
+
+    frame.on("select", function () {
+      var attachmentIds = [];
+      var attachments = frame.state().get("selection").toJSON();
+
+      attachments.forEach(function (attachment) {
+        attachmentIds.push(attachment.id);
+        $("#wp_slideshow_images_container").append(
+          '<div class="wp_slideshow_image" data-image-id="' +
+            attachment.id +
+            '">' +
+            '<img src="' +
+            attachment.url +
+            '" width="100">' +
+            '<button class="remove_image">Remove</button>' +
+            "</div>"
+        );
+      });
+
+      var currentImages = $("input[name='wp_slideshow_images']").val();
+      if (currentImages) {
+        currentImages += "," + attachmentIds.join(",");
+      } else {
+        currentImages = attachmentIds.join(",");
+      }
+      $("input[name='wp_slideshow_images']").val(currentImages);
+
+      console.log(
+        "Updated Hidden Input Value: " +
+          $("input[name='wp_slideshow_images']").val()
+      );
+    });
+
+    frame.open();
+  });
+
+  // Remove image
+  $("#wp_slideshow_images_container").on("click", ".remove_image", function () {
+    var imageId = $(this).closest(".wp_slideshow_image").data("image-id");
+    $(this).closest(".wp_slideshow_image").remove();
+
+    var currentImages = $("input[name='wp_slideshow_images']").val().split(",");
+    currentImages = currentImages.filter(function (id) {
+      return id != imageId;
+    });
+    $(document)
+      .find("input[name='wp_slideshow_images']")
+      .val(currentImages.join(","));
+
+    console.log(
+      "Updated Hidden Input Value: " +
+        $("input[name='wp_slideshow_images']").val()
+    );
+  });
 });
