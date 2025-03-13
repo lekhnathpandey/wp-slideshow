@@ -1,0 +1,68 @@
+.wp-slideshow-container {
+    width: 80%;
+    margin: 0 auto;
+    position: relative;
+}
+
+.wp-slideshow-container .slide img {
+    width: 100%;
+    height: auto;
+}
+
+.slick-prev,
+.slick-next {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    z-index: 1;
+}
+
+.slick-prev {
+    left: 10px;
+}
+
+.slick-next {
+    right: 10px;
+}
+
+.slick-prev:hover,
+.slick-next:hover {
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+.slick-dots {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+}
+
+.slick-dots li {
+    margin: 0 5px;
+}
+
+.slick-dots li button {
+    background-color: rgba(255, 255, 255, 0.5);
+    border: none;
+    border-radius: 50%;
+    width: 10px;
+    height: 10px;
+    padding: 0;
+    cursor: pointer;
+    text-indent: -9999px;
+	font-size: 12px;;
+}
+
+.slick-dots li.slick-active button {
+    background-color: white;
+}
